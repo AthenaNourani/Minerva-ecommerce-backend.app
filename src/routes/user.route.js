@@ -43,7 +43,7 @@ router.post("/register", async (req, res) => {
       email,
       password,
       emailVerificationToken: hashedEmailToken,
-      isEmailVerified: false,
+      isEmailVerified: true,
     });
     await user.save();
 
@@ -74,7 +74,7 @@ router.get("/verify-email/:token", async (req, res) => {
 
     const user = await User.findOne({
       emailVerificationToken: hashedToken,
-      isEmailVerified: false,
+      isEmailVerified: true,
     });
 
     if (!user) {
