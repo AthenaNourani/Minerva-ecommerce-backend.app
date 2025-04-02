@@ -174,6 +174,11 @@ router.post("/forgot-password", async (req, res) => {
       return res.status(404).json({ message: "Benutzer nicht gefunden" });
     }
 
+    // 🛑 E-Mail muss vorher verifiziert sein
+    if (!user.isEmailVerified) {
+      return res.status(403).json({ message: "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse." });
+    }
+    
     const resetToken = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
