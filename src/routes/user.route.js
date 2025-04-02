@@ -38,13 +38,16 @@ router.post("/register", async (req, res) => {
     const emailToken = crypto.randomBytes(32).toString("hex");
     const hashedEmailToken = crypto.createHash("sha256").update(emailToken).digest("hex");
 
+    const autoVerify = process.env.AUTO_VERIFY === "true";
+
     const user = new User({
       username,
       email,
       password,
-      emailVerificationToken: hashedEmailToken,
-      isEmailVerified: true,
+      emailVerificationToken: autoVerify ? undefined : hashedEmailToken,
+      isEmailVerified: autoVerify ? true : false,
     });
+
     await user.save();
 
     // 📧 Bestätigungslink erstellen
@@ -74,7 +77,7 @@ router.get("/verify-email/:token", async (req, res) => {
 
     const user = await User.findOne({
       emailVerificationToken: hashedToken,
-      isEmailVerified: true,
+      isEmailVerified: false,
     });
 
     if (!user) {
@@ -174,11 +177,6 @@ router.post("/forgot-password", async (req, res) => {
       return res.status(404).json({ message: "Benutzer nicht gefunden" });
     }
 
-    // 🛑 E-Mail muss vorher verifiziert sein
-    if (!user.isEmailVerified) {
-      return res.status(403).json({ message: "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse." });
-    }
-    
     const resetToken = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
@@ -187,7 +185,6 @@ router.post("/forgot-password", async (req, res) => {
     await user.save();
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-
     console.log("🔗 Reset-Link:", resetLink);
 
     const mailOptions = {
