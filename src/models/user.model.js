@@ -26,7 +26,6 @@ const userSchema = new Schema({
     // 💡 Hinweis: Da keine echte E-Mail-Verifizierung in dieser Entwicklungsumgebung erfolgt,
     // setzen wir diesen Wert immer auf "true", damit Benutzer sich einloggen können,
     // ohne eine Bestätigungsmail erhalten zu haben.
-    default: true,
   },
 });
 
